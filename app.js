@@ -50,6 +50,7 @@
   const gridView     = document.getElementById('gridView');
   const gridContainer= document.getElementById('gridContainer');
   const timelineRuler= document.getElementById('timelineRuler');
+  const timelineRulerFixed = document.getElementById('timelineRulerFixed');
   const timelineEras = document.getElementById('timelineEras');
   const timelineLanes= document.getElementById('timelineLanes');
   const resultCount  = document.getElementById('resultCount');
@@ -638,6 +639,7 @@
       document.querySelectorAll(`.filter-btn[data-filter="${filter}"]`).forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       render();
+      if (window._updateFilterCount) window._updateFilterCount();
     });
   });
 
@@ -646,6 +648,7 @@
     state.search = searchInput.value.trim();
     clearSearch.hidden = !state.search;
     render();
+    if (window._updateFilterCount) window._updateFilterCount();
   });
   clearSearch.addEventListener('click', () => {
     searchInput.value = '';
@@ -653,6 +656,7 @@
     clearSearch.hidden = true;
     searchInput.focus();
     render();
+    if (window._updateFilterCount) window._updateFilterCount();
   });
 
   // ── Reset
@@ -664,6 +668,7 @@
       b.classList.toggle('active', b.dataset.value === 'all');
     });
     render();
+    if (window._updateFilterCount) window._updateFilterCount();
   }
   document.getElementById('resetAll').addEventListener('click', resetAll);
   document.getElementById('resetAll2').addEventListener('click', resetAll);
@@ -675,6 +680,7 @@
     document.getElementById('viewGrid').classList.remove('active');
     timelineView.classList.remove('hidden');
     gridView.classList.add('hidden');
+    if (window._updateRulerVisibility) window._updateRulerVisibility('timeline');
     render();
   });
   document.getElementById('viewGrid').addEventListener('click', () => {
@@ -683,8 +689,49 @@
     document.getElementById('viewTimeline').classList.remove('active');
     gridView.classList.remove('hidden');
     timelineView.classList.add('hidden');
+    if (window._updateRulerVisibility) window._updateRulerVisibility('grid');
     render();
   });
+
+  // ── Filter pane toggle
+  (function () {
+    const filterToggle = document.getElementById('filterToggle');
+    const filtersPane  = document.getElementById('filtersPane');
+    const activeCount  = document.getElementById('filterActiveCount');
+    if (!filterToggle || !filtersPane) return;
+
+    // On mobile, start collapsed
+    const startCollapsed = window.innerWidth <= 768;
+    let isOpen = !startCollapsed;
+    if (startCollapsed) {
+      filtersPane.classList.add('collapsed');
+      filterToggle.setAttribute('aria-expanded', 'false');
+    }
+
+    filterToggle.addEventListener('click', () => {
+      isOpen = !isOpen;
+      filtersPane.classList.toggle('collapsed', !isOpen);
+      filterToggle.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    // Update active filter count badge
+    function updateFilterCount() {
+      const nonDefault = ['type', 'brand', 'speed', 'subtype'].filter(k => state[k] !== 'all').length
+        + (state.search.trim() ? 1 : 0);
+      if (nonDefault > 0) {
+        activeCount.textContent = nonDefault;
+        activeCount.hidden = false;
+        filterToggle.classList.add('has-active');
+      } else {
+        activeCount.hidden = true;
+        filterToggle.classList.remove('has-active');
+      }
+    }
+
+    // Expose so render() can call it
+    window._updateFilterCount = updateFilterCount;
+    updateFilterCount();
+  })();
 
   // ── Stats toggle
   statsToggle.addEventListener('click', () => {
@@ -709,6 +756,67 @@
       btn && btn.addEventListener('click', () => setTimeout(() => update(mq), 50));
     });
     update(mq);
+  })();
+
+  // ── Fixed ruler: pin below header+controls, sync horizontal scroll with timeline
+  (function () {
+    const rulerFixed  = document.getElementById('timelineRulerFixed');
+    const rulerEl     = document.getElementById('timelineRuler');
+    const tvEl        = document.getElementById('timelineView');
+    const headerEl    = document.querySelector('.site-header');
+    const controlsEl  = document.querySelector('.controls-bar');
+    const hintEl      = document.getElementById('landscapeHint');
+    if (!rulerFixed || !rulerEl || !tvEl) return;
+
+    // Measure combined height of fixed bars above timeline
+    function getTopOffset() {
+      let offset = 0;
+      if (headerEl)  offset += headerEl.getBoundingClientRect().height;
+      if (controlsEl) offset += controlsEl.getBoundingClientRect().height;
+      if (hintEl && !hintEl.hidden) offset += hintEl.getBoundingClientRect().height;
+      return offset;
+    }
+
+    function updateRulerPosition() {
+      const top = getTopOffset();
+      document.documentElement.style.setProperty('--ruler-top', top + 'px');
+      // Also set left/right to match the timeline-view's left edge (for padding)
+      const tvRect = tvEl.getBoundingClientRect();
+      rulerFixed.style.left  = tvRect.left + 'px';
+      rulerFixed.style.right = (window.innerWidth - tvRect.right) + 'px';
+    }
+
+    // Sync horizontal scroll of ruler with the timeline-view scroll
+    function syncScroll() {
+      rulerEl.style.transform = `translateX(-${tvEl.scrollLeft}px)`;
+    }
+
+    tvEl.addEventListener('scroll', syncScroll, { passive: true });
+    syncScroll();
+    updateRulerPosition();
+
+    // Re-measure on resize and after filter/stats transitions
+    window.addEventListener('resize', updateRulerPosition);
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(() => {
+        updateRulerPosition();
+        syncScroll();
+      });
+      if (headerEl)  ro.observe(headerEl);
+      if (controlsEl) ro.observe(controlsEl);
+    }
+
+    // Re-measure after filter pane transition (300ms)
+    const filterToggleBtn = document.getElementById('filterToggle');
+    if (filterToggleBtn) {
+      filterToggleBtn.addEventListener('click', () => setTimeout(updateRulerPosition, 320));
+    }
+
+    // Show/hide ruler overlay based on view
+    window._updateRulerVisibility = function(view) {
+      if (rulerFixed) rulerFixed.classList.toggle('hidden', view !== 'timeline');
+    };
   })();
 
   // ── Init

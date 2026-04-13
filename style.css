@@ -285,10 +285,85 @@ a { color: inherit; text-decoration: none; }
 .controls-inner {
   max-width: 1600px;
   margin: 0 auto;
-  padding: var(--space-4) var(--space-6);
+  padding: var(--space-3) var(--space-6);
   display: flex;
   flex-direction: column;
+  gap: 0;
+}
+
+/* Search + toggle button row */
+.controls-top-row {
+  display: flex;
+  align-items: center;
   gap: var(--space-3);
+  padding: var(--space-2) 0;
+}
+.controls-top-row .search-wrap { flex: 1; }
+
+/* Filter toggle button */
+.filter-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.25rem var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: transparent;
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all var(--transition);
+  flex-shrink: 0;
+  min-height: 32px;
+}
+.filter-toggle-btn:hover {
+  background: var(--color-surface-offset);
+  color: var(--color-text);
+  border-color: var(--color-text-muted);
+}
+.filter-toggle-btn.has-active {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.filter-chevron {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+.filter-toggle-btn[aria-expanded="false"] .filter-chevron {
+  transform: rotate(180deg);
+}
+.filter-active-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+.filter-active-count[hidden] { display: none; }
+
+/* Collapsible pane */
+.filters-pane {
+  overflow: hidden;
+  max-height: 400px;
+  transition: max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.2s ease,
+              padding 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 1;
+  padding-bottom: var(--space-3);
+}
+.filters-pane.collapsed {
+  max-height: 0;
+  opacity: 0;
+  padding-bottom: 0;
 }
 .search-wrap {
   position: relative;
@@ -436,16 +511,35 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* Year ruler */
+/* Fixed ruler overlay wrapper — sits above the timeline, z-indexed over content */
+.timeline-ruler-fixed {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: var(--ruler-top, 0px);
+  z-index: 85; /* below controls (90) but above timeline content */
+  overflow: hidden;          /* clips the inner wide ruler */
+  pointer-events: none;      /* clicks pass through to timeline bars */
+  display: block;
+}
+.timeline-ruler-fixed.hidden { display: none; }
+
+/* The actual ruler strip — wide, scrolled via JS to match timeline */
 .timeline-ruler {
-  position: sticky;
-  top: 0;
-  z-index: 10;
   display: flex;
   height: 32px;
   border-bottom: 1px solid var(--color-border);
   background: var(--color-bg);
   min-width: var(--timeline-width, 1400px);
+  /* no position/top/sticky needed — parent is fixed */
+  will-change: transform;
+}
+
+/* Spacer inside timelineView so content doesn't jump under the ruler */
+.timeline-ruler-spacer {
+  height: 32px;
   margin-top: var(--space-4);
+  flex-shrink: 0;
 }
 .ruler-year {
   position: absolute;
@@ -1042,11 +1136,13 @@ a { color: inherit; text-decoration: none; }
   /* ── Controls / Filters ── */
   .controls-bar { top: 56px; } /* shorter header */
   .controls-inner {
-    padding: var(--space-2) var(--space-3);
-    gap: var(--space-2);
+    padding: var(--space-1) var(--space-3);
   }
+  .controls-top-row { padding: var(--space-2) 0; }
   .search-wrap { max-width: 100%; }
   .search-input { font-size: 16px; } /* prevent iOS zoom on focus */
+  /* Filters collapsed by default on mobile via JS adding .collapsed */
+  /* The JS reads window.innerWidth at init and adds .collapsed if mobile */
 
   .filters-row {
     gap: var(--space-2);
