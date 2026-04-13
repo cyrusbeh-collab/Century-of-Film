@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Film Box Art — Proof of Concept</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,700;0,800;1,400&family=DM+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #141210;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    gap: 48px;
+    padding: 60px 40px;
+    font-family: 'DM Sans', sans-serif;
+    color: #fff;
+  }
+
+  h1 {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: #555;
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .demo-row {
+    display: flex;
+    gap: 120px;
+    align-items: flex-end;
+  }
+  .demo-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+  .demo-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: #555;
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ───────────────────────────────────────────────
+     Generic 3D box mixin
+     Usage: set --w, --h, --d CSS vars on .box-3d
+     and define .face-front, .face-right, .face-top
+  ─────────────────────────────────────────────── */
+
+  .box-scene {
+    perspective: 700px;
+    display: inline-block;
+  }
+
+  .box-3d {
+    position: relative;
+    transform-style: preserve-3d;
+    transform: rotateX(-10deg) rotateY(32deg);
+    transition: transform 0.55s cubic-bezier(0.16,1,0.3,1);
+    cursor: pointer;
+  }
+  .box-3d:hover {
+    transform: rotateX(-6deg) rotateY(20deg);
+  }
+
+  .box-3d .face {
+    position: absolute;
+    overflow: hidden;
+    box-shadow: inset 0 0 0 0.5px rgba(255,255,255,0.06);
+  }
+
+  /* ───────────────────────────────────────────────
+     VISION3 200T — square canister box
+     W=170, H=170, D=108
+  ─────────────────────────────────────────────── */
+  .v3 {
+    --w: 170px;
+    --h: 170px;
+    --d: 108px;
+    width: var(--w);
+    height: var(--h);
+  }
+
+  /* front: faces viewer, shifted forward by D/2 */
+  .v3 .face-front {
+    width: var(--w);
+    height: var(--h);
+    transform: translateZ(calc(var(--d) / 2));
+  }
+  /* back */
+  .v3 .face-back {
+    width: var(--w);
+    height: var(--h);
+    transform: translateZ(calc(var(--d) / -2)) rotateY(180deg);
+  }
+  /* right: pivot from right edge of front */
+  .v3 .face-right {
+    width: var(--d);
+    height: var(--h);
+    left: var(--w);
+    transform-origin: left center;
+    transform: rotateY(90deg);
+  }
+  /* left */
+  .v3 .face-left {
+    width: var(--d);
+    height: var(--h);
+    transform-origin: right center;
+    transform: rotateY(-90deg);
+  }
+  /* top: pivot from top edge */
+  .v3 .face-top {
+    width: var(--w);
+    height: var(--d);
+    top: calc(-1 * var(--d));
+    transform-origin: bottom center;
+    transform: rotateX(90deg);
+  }
+  /* bottom */
+  .v3 .face-bottom {
+    width: var(--w);
+    height: var(--d);
+    top: var(--h);
+    transform-origin: top center;
+    transform: rotateX(-90deg);
+  }
+
+  /* ───────────────────────────────────────────────
+     INSTAX MINI — tall slim box
+     W=130, H=200, D=62
+  ─────────────────────────────────────────────── */
+  .ix {
+    --w: 130px;
+    --h: 200px;
+    --d: 62px;
+    width: var(--w);
+    height: var(--h);
+  }
+  .ix .face-front {
+    width: var(--w);
+    height: var(--h);
+    transform: translateZ(calc(var(--d) / 2));
+  }
+  .ix .face-right {
+    width: var(--d);
+    height: var(--h);
+    left: var(--w);
+    transform-origin: left center;
+    transform: rotateY(90deg);
+  }
+  .ix .face-top {
+    width: var(--w);
+    height: var(--d);
+    top: calc(-1 * var(--d));
+    transform-origin: bottom center;
+    transform: rotateX(90deg);
+  }
+
+  /* ── ambient shadows on faces ── */
+  .face-right  { filter: brightness(0.72); }
+  .face-top    { filter: brightness(0.85); }
+  .face-bottom { filter: brightness(0.6); }
+  .face-back   { filter: brightness(0.5); }
+
+  /* ── Reference comparison strip ── */
+  .ref-row {
+    display: flex;
+    gap: 120px;
+    align-items: center;
+    margin-top: 8px;
+  }
+  .ref-img {
+    width: 130px;
+    border-radius: 4px;
+    opacity: 0.7;
+    border: 1px solid #333;
+  }
+  .ref-label {
+    font-size: 9px;
+    color: #444;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.08em;
+    text-align: center;
+    margin-top: 6px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Film Box Art — SVG faithful recreation · proof of concept</h1>
+
+<div class="demo-row">
+
+  <!-- ════════════════════════════════════
+       KODAK VISION3 200T
+  ════════════════════════════════════ -->
+  <div class="demo-item">
+    <div class="box-scene">
+      <div class="box-3d v3">
+
+        <!-- ── FRONT FACE ── -->
+        <div class="face face-front">
+          <svg xmlns="http://www.w3.org/2000/svg" width="170" height="170" viewBox="0 0 170 170">
+
+            <!-- Yellow body -->
+            <rect width="170" height="170" fill="#F4A300"/>
+
+            <!-- Top black header band -->
+            <rect width="170" height="52" fill="#111111"/>
+
+            <!-- Kodak red wordmark -->
+            <text x="11" y="21" font-family="'DM Sans',sans-serif"
+                  font-size="14" font-weight="800" fill="#E3001B" letter-spacing="0.5">Kodak</text>
+
+            <!-- VISION3 in gold/khaki on black -->
+            <text x="11" y="44" font-family="'DM Sans',sans-serif"
+                  font-size="26" font-weight="800" fill="#C8922A" letter-spacing="-0.5">VISION</text>
+            <!-- Superscript 3 larger and touching -->
+            <text x="124" y="44" font-family="'DM Sans',sans-serif"
+                  font-size="30" font-weight="800" fill="#C8922A">3</text>
+
+            <!-- "Color Negative Film" under the band -->
+            <text x="11" y="61" font-family="'DM Sans',sans-serif"
+                  font-size="7.5" font-weight="400" fill="#999" letter-spacing="0.5">Color Negative Film</text>
+
+            <!-- Three grey squares (colour sensitivity indicators) -->
+            <rect x="127" y="54" width="9" height="9" fill="#777"/>
+            <rect x="138" y="54" width="9" height="9" fill="#999"/>
+            <rect x="149" y="54" width="9" height="9" fill="#bbb"/>
+
+            <!-- Main speed identifier — big bold on yellow -->
+            <text x="11" y="105" font-family="'DM Sans',sans-serif"
+                  font-size="36" font-weight="800" fill="#111" letter-spacing="-1">200T</text>
+
+            <!-- Stock number -->
+            <text x="12" y="120" font-family="'DM Sans',sans-serif"
+                  font-size="13" font-weight="700" fill="#3a2800">/7213</text>
+
+            <!-- Exposure table (recreated from box) -->
+            <g transform="translate(10,130)">
+              <rect width="100" height="28" fill="none" stroke="#666" stroke-width="0.6"/>
+              <line x1="0" y1="13" x2="100" y2="13" stroke="#666" stroke-width="0.6"/>
+              <line x1="50" y1="0" x2="50" y2="28" stroke="#666" stroke-width="0.6"/>
+              <!-- headers -->
+              <text x="3" y="10" font-family="'DM Mono',monospace" font-size="5.5" fill="#666">☀ 3200K</text>
+              <text x="53" y="10" font-family="'DM Mono',monospace" font-size="5.5" fill="#666">EI 200/24°</text>
+              <!-- row 2 -->
+              <text x="3" y="24" font-family="'DM Mono',monospace" font-size="5.5" fill="#666">✦ Filter 85</text>
+              <text x="53" y="24" font-family="'DM Mono',monospace" font-size="5.5" fill="#666">EI 125/22°</text>
+            </g>
+
+            <!-- www URL -->
+            <text x="11" y="165" font-family="'DM Mono',monospace" font-size="5"
+                  fill="#888" letter-spacing="0.2">www.kodak.com/go/super8</text>
+
+          </svg>
+        </div>
+
+        <!-- ── RIGHT SPINE ── -->
+        <div class="face face-right">
+          <svg xmlns="http://www.w3.org/2000/svg" width="108" height="170" viewBox="0 0 108 170">
+            <!-- Dark amber side -->
+            <rect width="108" height="170" fill="#D49000"/>
+            <!-- Sprocket strip top -->
+            <rect width="108" height="12" fill="#0a0a0a"/>
+            <!-- Sprocket holes -->
+            <rect x="6"  y="3" width="8" height="6" rx="1.5" fill="#D49000" opacity="0.6"/>
+            <rect x="20" y="3" width="8" height="6" rx="1.5" fill="#D49000" opacity="0.6"/>
+            <rect x="34" y="3" width="8" height="6" rx="1.5" fill="#D49000" opacity="0.6"/>
+            <rect x="48" y="3" width="8" height="6" rx="1.5" fill="#D49000" opacity="0.6"/>
+            <rect x="62" y="3" width="8" height="6" rx="1.5" fill="#D49000" opacity="0.6"/>
+            <rect x="76" y="3" width="8" height="6" rx="1.5" fill="#D49000" opacity="0.6"/>
+            <rect x="90" y="3" width="8" height="6" rx="1.5" fill="#D49000" opacity="0.6"/>
+            <!-- Sprocket strip bottom -->
+            <rect y="158" width="108" height="12" fill="#0a0a0a"/>
+            <rect x="6"  y="161" width="8" height="6" rx="1.5" fill="#D49000" opacity="0.6"/>
+            <rect x="20" y="161" width="8" height="6" rx="1.5" fill="#D49000" opacity="0.6"/>
+            <rect x="34" y="161" width="8" height="6" rx="1.5" fill="#D49000" opacity="0.6"/>
+            <rect x="48" y="161" width="8" height="6" rx="1.5" fill="#D49000" opacity="0.6"/>
+            <rect x="62" y="161" width="8" height="6" rx="1.5" fill="#D49000" opacity="0.6"/>
+            <rect x="76" y="161" width="8" height="6" rx="1.5" fill="#D49000" opacity="0.6"/>
+            <rect x="90" y="161" width="8" height="6" rx="1.5" fill="#D49000" opacity="0.6"/>
+            <!-- Rotated spine text -->
+            <text x="54" y="92" text-anchor="middle" font-family="'DM Sans',sans-serif"
+                  font-size="10" font-weight="700" fill="#1a1000"
+                  transform="rotate(-90,54,92)" letter-spacing="2">KODAK VISION3 200T · 7213</text>
+            <text x="54" y="30" text-anchor="middle" font-family="'DM Mono',monospace"
+                  font-size="6.5" fill="#7a4800" opacity="0.8"
+                  transform="rotate(-90,54,30)">ECN-2 PROCESS ONLY</text>
+          </svg>
+        </div>
+
+        <!-- ── TOP FACE ── -->
+        <div class="face face-top">
+          <svg xmlns="http://www.w3.org/2000/svg" width="170" height="108" viewBox="0 0 170 108">
+            <rect width="170" height="108" fill="#111111"/>
+            <text x="85" y="52" text-anchor="middle" font-family="'DM Sans',sans-serif"
+                  font-size="13" font-weight="800" fill="#C8922A" letter-spacing="2">VISION3 200T</text>
+            <text x="85" y="68" text-anchor="middle" font-family="'DM Mono',monospace"
+                  font-size="7.5" fill="#555" letter-spacing="1.5">COLOR NEGATIVE FILM</text>
+            <text x="85" y="82" text-anchor="middle" font-family="'DM Mono',monospace"
+                  font-size="6.5" fill="#444">SUPER 8 · ECN-2</text>
+          </svg>
+        </div>
+
+        <!-- ── BOTTOM FACE ── -->
+        <div class="face face-bottom">
+          <svg xmlns="http://www.w3.org/2000/svg" width="170" height="108" viewBox="0 0 170 108">
+            <rect width="170" height="108" fill="#F4A300"/>
+            <text x="85" y="58" text-anchor="middle" font-family="'DM Mono',monospace"
+                  font-size="7" fill="#7a4800">CAT 138 0765</text>
+          </svg>
+        </div>
+
+        <!-- ── BACK FACE ── -->
+        <div class="face face-back">
+          <svg xmlns="http://www.w3.org/2000/svg" width="170" height="170" viewBox="0 0 170 170">
+            <rect width="170" height="170" fill="#F4A300"/>
+            <text x="85" y="90" text-anchor="middle" font-family="'DM Mono',monospace"
+                  font-size="7" fill="#7a4800">KODAK VISION3 200T</text>
+          </svg>
+        </div>
+
+      </div>
+    </div>
+    <div class="demo-label">Kodak Vision3 200T · Super 8</div>
+  </div>
+
+
+  <!-- ════════════════════════════════════
+       FUJIFILM INSTAX MINI
+  ════════════════════════════════════ -->
+  <div class="demo-item">
+    <div class="box-scene">
+      <div class="box-3d ix">
+
+        <!-- ── FRONT FACE ── -->
+        <div class="face face-front">
+          <svg xmlns="http://www.w3.org/2000/svg" width="130" height="200" viewBox="0 0 130 200">
+
+            <!-- White body -->
+            <rect width="130" height="200" fill="#ffffff"/>
+
+            <!-- Green top header band -->
+            <rect width="130" height="32" fill="#2DB544"/>
+
+            <!-- FUJIFILM wordmark in white on green -->
+            <text x="14" y="21" font-family="'DM Sans',sans-serif"
+                  font-size="11" font-weight="800" fill="white" letter-spacing="0.3">FUJIFILM</text>
+
+            <!-- "mini" rounded pill -->
+            <rect x="84" y="9" width="34" height="15" rx="3" fill="white"/>
+            <text x="101" y="20.5" text-anchor="middle" font-family="'DM Sans',sans-serif"
+                  font-size="8" font-weight="700" fill="#2DB544">mini</text>
+
+            <!-- Green thin stripe below header -->
+            <rect y="32" width="130" height="3" fill="#25A03C"/>
+
+            <!-- instax mini text logo -->
+            <text x="13" y="168" font-family="'DM Sans',sans-serif"
+                  font-size="20" font-weight="800" fill="#111" letter-spacing="-0.5">instax</text>
+            <text x="13" y="188" font-family="'DM Sans',sans-serif"
+                  font-size="20" font-weight="800" fill="#111" letter-spacing="-0.5">mini™</text>
+
+            <!-- Simulated instant print photograph frame -->
+            <rect x="10" y="40" width="110" height="110" rx="2" fill="#f0eee8"/>
+            <!-- White border (print border) -->
+            <rect x="15" y="45" width="100" height="92" fill="white"
+                  filter="url(#print-shadow)"/>
+            <!-- Photo content: abstract warm gradient simulating a photo -->
+            <defs>
+              <linearGradient id="photo-grad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#e8c8f0"/>
+                <stop offset="50%" stop-color="#f0d8e8"/>
+                <stop offset="100%" stop-color="#d8b8e8"/>
+              </linearGradient>
+              <filter id="print-shadow">
+                <feDropShadow dx="1" dy="1" stdDeviation="2" flood-opacity="0.12"/>
+              </filter>
+            </defs>
+            <rect x="15" y="45" width="100" height="80" fill="url(#photo-grad)"/>
+            <!-- Stylised figures (two people hugging, like real box) -->
+            <!-- Person 1 -->
+            <ellipse cx="52" cy="100" rx="16" ry="22" fill="#c8a0e0"/>
+            <ellipse cx="50" cy="78" rx="11" ry="11" fill="#d8b8f0"/>
+            <!-- Person 2 -->
+            <ellipse cx="78" cy="96" rx="15" ry="24" fill="#a880c8"/>
+            <ellipse cx="78" cy="75" rx="10" ry="10" fill="#c098e0"/>
+            <!-- Overlapping arms (hugging) -->
+            <ellipse cx="65" cy="102" rx="8" ry="5" fill="#b890d4" opacity="0.6"/>
+
+            <!-- Subtitle text -->
+            <text x="13" y="197" font-family="'DM Sans',sans-serif"
+                  font-size="5" fill="#aaa" letter-spacing="0.2">INSTANT FILM / FILM INSTANTANÉ / PELÍCULA INSTANTÁNEA</text>
+
+            <!-- Green bottom stripe -->
+            <rect y="188" width="130" height="12" fill="#2DB544"/>
+            <text x="65" y="197" text-anchor="middle" font-family="'DM Sans',sans-serif"
+                  font-size="7.5" font-weight="700" fill="white">20 SHEETS · 2×10 PACKS</text>
+
+          </svg>
+        </div>
+
+        <!-- ── RIGHT SPINE ── -->
+        <div class="face face-right">
+          <svg xmlns="http://www.w3.org/2000/svg" width="62" height="200" viewBox="0 0 62 200">
+            <!-- Green spine -->
+            <rect width="62" height="200" fill="#2DB544"/>
+            <!-- Barcode area -->
+            <rect x="8" y="30" width="46" height="90" rx="2" fill="white" opacity="0.15"/>
+            <!-- Spine text -->
+            <text x="31" y="170" text-anchor="middle" font-family="'DM Sans',sans-serif"
+                  font-size="8.5" font-weight="700" fill="white"
+                  transform="rotate(-90,31,170)" letter-spacing="1.5">instax mini · FUJIFILM</text>
+            <text x="31" y="28" text-anchor="middle" font-family="'DM Mono',monospace"
+                  font-size="5.5" fill="rgba(255,255,255,0.55)"
+                  transform="rotate(-90,31,28)">INSTANT FILM</text>
+          </svg>
+        </div>
+
+        <!-- ── TOP LID ── -->
+        <div class="face face-top">
+          <svg xmlns="http://www.w3.org/2000/svg" width="130" height="62" viewBox="0 0 130 62">
+            <!-- Green lid -->
+            <rect width="130" height="62" fill="#2DB544"/>
+            <!-- Triangle handle tab depression -->
+            <polygon points="46,0 84,0 65,20" fill="rgba(0,0,0,0.18)"/>
+            <!-- FUJIFILM -->
+            <text x="65" y="46" text-anchor="middle" font-family="'DM Sans',sans-serif"
+                  font-size="10" font-weight="800" fill="white" letter-spacing="0.5">FUJIFILM</text>
+            <!-- mini pill -->
+            <rect x="72" y="50" width="28" height="11" rx="3" fill="white"/>
+            <text x="86" y="59" text-anchor="middle" font-family="'DM Sans',sans-serif"
+                  font-size="7" font-weight="700" fill="#2DB544">mini</text>
+          </svg>
+        </div>
+
+      </div>
+    </div>
+    <div class="demo-label">Fujifilm Instax Mini · 20 Sheets</div>
+  </div>
+
+</div>
+
+<div style="margin-top:16px;font-size:10px;color:#444;font-family:'DM Mono',monospace;max-width:560px;text-align:center;line-height:1.8">
+  APPROACH · SVG faces faithfully hand-recreated from reference photos<br>
+  mapped to CSS preserve-3d box · no AI generation · hover to rotate
+</div>
+
+<script data-pplx-inline-edit>
+(function(){
+  if(window===window.top)return;
+  function inlineAll(orig,clone){
+    if(orig.nodeType!==1)return;
+    try{
+      var cs=getComputedStyle(orig);
+      var t='';
+      for(var i=0;i<cs.length;i++){t+=cs[i]+':'+cs.getPropertyValue(cs[i])+';';}
+      clone.style.cssText=t;
+    }catch(e){}
+    var oc=orig.children,cc=clone.children;
+    for(var j=0;j<oc.length&&j<cc.length;j++){inlineAll(oc[j],cc[j]);}
+  }
+  function stripExternal(clone){
+    var imgs=clone.querySelectorAll('img');
+    for(var i=0;i<imgs.length;i++){
+      var s=imgs[i].getAttribute('src');
+      if(s&&!s.startsWith('data:'))imgs[i].removeAttribute('src');
+    }
+    var all=clone.querySelectorAll('*');
+    for(var i=0;i<all.length;i++){
+      var st=all[i].style.cssText;
+      if(st&&st.indexOf('url(')>=0){
+        all[i].style.cssText=st.replace(/url\(["']?(?!data:)[^)"']*["']?\)/gi,'none');
+      }
+    }
+  }
+  window.addEventListener('message',function(e){
+    if(!e.data||e.data.type!=='INLINE_EDIT_CAPTURE_REQUEST')return;
+    var scrollX=window.scrollX||window.pageXOffset||0;
+    var scrollY=window.scrollY||window.pageYOffset||0;
+    var w=window.innerWidth,h=window.innerHeight;
+    try{
+      var clone=document.documentElement.cloneNode(true);
+      var rm=clone.querySelectorAll('script,link[rel="stylesheet"],style');
+      for(var i=0;i<rm.length;i++){rm[i].remove();}
+      inlineAll(document.documentElement,clone);
+      stripExternal(clone);
+      var html=new XMLSerializer().serializeToString(clone);
+      var svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'">'
+        +'<foreignObject width="100%" height="100%">'
+        +'<div xmlns="http://www.w3.org/1999/xhtml" style="width:'+w+'px;height:'+h+'px;overflow:hidden">'
+        +'<div style="transform:translate(-'+scrollX+'px,-'+scrollY+'px);transform-origin:top left">'
+        +html+'</div></div></foreignObject></svg>';
+      var svgUrl='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+      var img=new Image();
+      img.onload=function(){
+        var c=document.createElement('canvas');c.width=w;c.height=h;
+        c.getContext('2d').drawImage(img,0,0);
+        window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:c.toDataURL('image/png'),scrollX:scrollX,scrollY:scrollY},'*');
+      };
+      img.onerror=function(){
+        window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:null,scrollX:scrollX,scrollY:scrollY},'*');
+      };
+      img.src=svgUrl;
+    }catch(err){
+      window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:null,scrollX:scrollX,scrollY:scrollY},'*');
+    }
+  });
+})();
+</script></body>
+</html>
