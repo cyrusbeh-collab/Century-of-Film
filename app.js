@@ -575,6 +575,34 @@
   modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modalOverlay.hidden) closeModal(); });
 
+  // ── Swipe down to close modal on touch devices
+  (function () {
+    const modalEl = document.getElementById('modal');
+    let startY = 0, currentY = 0, dragging = false;
+    modalEl.addEventListener('touchstart', e => {
+      startY = e.touches[0].clientY;
+      dragging = true;
+      modalEl.style.transition = 'none';
+    }, { passive: true });
+    modalEl.addEventListener('touchmove', e => {
+      if (!dragging) return;
+      currentY = e.touches[0].clientY;
+      const dy = Math.max(0, currentY - startY);
+      modalEl.style.transform = `translateY(${dy}px)`;
+    }, { passive: true });
+    modalEl.addEventListener('touchend', () => {
+      dragging = false;
+      modalEl.style.transition = '';
+      const dy = currentY - startY;
+      if (dy > 80) {
+        closeModal();
+      } else {
+        modalEl.style.transform = '';
+      }
+      startY = 0; currentY = 0;
+    });
+  })();
+
   // ── Tooltip
   function showTooltip(e, s) {
     if (!tooltip) {
@@ -664,6 +692,24 @@
     statsToggle.classList.toggle('active', open);
     statsPanel.setAttribute('aria-hidden', !open);
   });
+
+  // ── Landscape hint banner for mobile portrait
+  (function () {
+    const banner = document.getElementById('landscapeHint');
+    if (!banner) return;
+    const mq = window.matchMedia('(orientation: portrait) and (max-width: 768px)');
+    const update = (e) => {
+      // Show hint only when: mobile + portrait + timeline view active
+      banner.hidden = !(e.matches && state.view === 'timeline');
+    };
+    mq.addEventListener('change', update);
+    // Also re-evaluate whenever view changes (patch into view buttons)
+    ['viewTimeline','viewGrid'].forEach(id => {
+      const btn = document.getElementById(id);
+      btn && btn.addEventListener('click', () => setTimeout(() => update(mq), 50));
+    });
+    update(mq);
+  })();
 
   // ── Init
   buildRuler();
