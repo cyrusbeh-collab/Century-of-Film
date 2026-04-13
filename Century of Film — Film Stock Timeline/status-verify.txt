@@ -1,0 +1,97 @@
+id:5|Kodak Motion Picture Duplicating Film 1926
+id:6|Kodak Type II Cine Negative Panchromatic 1928
+id:7|Kodak Type III Cine Negative Panchromatic 1928
+id:8|Kodak Panchromatic K Infrared cine film 1928
+id:9|Kodak Super-Sensitive Cine Negative Panchromatic 1931
+id:12|Kodak TRI-X Panchromatic Negative 5233 cine film discontinued
+id:13|Kodak Plus-X Reversal 7276 Super 8 film discontinued
+id:14|Kodak TRI-X Reversal 7278 Super 8 film discontinued
+id:15|Kodak Double-X 5222 7222 film current production status 2024
+id:65|Kodak EXR 100T 5248 cine film discontinued
+id:73|Kodak VISION2 500T 5218 7218 cine film discontinued
+id:76|Kodak VISION3 500T 5219 film current production 2024
+id:77|Kodak VISION3 200T 5213 film current production 2024
+id:78|Kodak VISION3 50D 5203 film current production 2024
+id:79|Kodak EKTACHROME 7294 Super 8 film current production 2024
+id:100|3M Dynachrome slide film discontinued
+id:102|3M Dynachrome 25 slide film discontinued
+id:103|3M Color Slide 100 film discontinued
+id:104|3M Color Print 100 film discontinued
+id:107|3M CR 64 Camera Reversal film discontinued
+id:108|3M CR 160 Camera Reversal film discontinued
+id:109|3M CR 250 Camera Reversal film discontinued
+id:110|3M Fine Grain Release Positive Type 150 film discontinued
+id:111|3M ColorSlide 100D film discontinued
+id:112|3M ColorSlide 640-T film discontinued
+id:113|3M ColorPrint HR200 film discontinued
+id:114|Scotch Chrome 640-T film discontinued
+id:116|Scotch Chrome 1000 film discontinued
+id:117|ScotchChrome 400 film discontinued
+id:118|ScotchChrome 100 film discontinued
+id:119|Scotch 200 ATG1 film discontinued
+id:120|Scotch 400 ATG1 film discontinued
+id:121|3M DynaPan 160 film discontinued
+id:122|3M Black-and-White 80 film discontinued
+id:123|3M Black-and-White 200 film discontinued
+id:156|Agfa XT100 film discontinued
+id:157|Agfa XTR250 film discontinued
+id:200|Fuji Color Negative F-125 cine film discontinued
+id:201|Fuji F-500 Negative cine film discontinued
+id:202|Fuji Super F-Series cine film discontinued
+id:250|Ilford HP5 Plus current production status 2025
+id:251|Ilford FP4 Plus current production status 2025
+id:252|Ilford Delta 400 current production status 2025
+id:253|Ilford Delta 3200 current production status 2025
+id:254|Ilford Pan F Plus current production status 2025
+id:255|Ilford XP2 Super current production status 2025
+id:256|Ilford SFX 200 current production status 2025
+id:300|Kodak Tri-X 400 TX current production status 2025
+id:301|Kodak T-MAX 100 current production status 2025
+id:302|Kodak T-MAX 400 current production status 2025
+id:303|Kodak T-MAX P3200 current production status 2025
+id:306|Kodak Gold 200 current production status 2025
+id:307|Kodak Portra 160 current production status 2025
+id:308|Kodak Portra 400 current production status 2025
+id:309|Kodak Portra 800 current production status 2025
+id:310|Kodak Ektar 100 current production status 2025
+id:311|Kodak UltraMax 400 current production status 2025
+id:312|Kodak ColorPlus 200 current production status 2025
+id:314|Kodak Ektachrome E100 current production status 2025
+id:350|Fujifilm Velvia 50 RVP current production status 2025
+id:351|Fujifilm Velvia 100 current production status 2025
+id:352|Fujifilm Provia 100F current production status 2025
+id:353|Fujifilm Superia 400 current production status 2025
+id:355|Fujifilm Neopan 100 Acros II current production status 2025
+id:357|Fujifilm Instax Mini current production status 2025
+id:400|CineStill 800T current production status 2025
+id:401|CineStill 50D current production status 2025
+id:402|Ferrania P30 Alpha current production status 2025
+id:403|Lomography 800 film current production status 2025
+id:600|Harman Direct Positive Paper current production status 2025
+id:601|Harman Phoenix 200 current production status 2025
+id:655|Film Ferrania P30 Alpha current production status 2025
+id:656|Film Ferrania P30 MkII current production status 2025
+id:657|Film Ferrania P33 current production status 2025
+id:700|Lomography X-Pro Chrome 100 current production status 2025
+id:701|Lomography Color Negative 100 current production status 2025
+id:702|Lomography Color Negative 400 current production status 2025
+id:703|Lomography Color Negative 800 current production status 2025
+id:704|Lomography Lady Grey 400 current production status 2025
+id:705|Lomography Earl Grey 100 current production status 2025
+id:706|LomoChrome Purple XR current production status 2025
+id:707|LomoChrome Turquoise current production status 2025
+id:708|LomoChrome Metropolis current production status 2025
+id:709|Lomography Berlin Kino 400 current production status 2025
+id:710|Lomography Fantome Kino B&W 8 current production status 2025
+id:750|Shanghai GP3 100 sheet film current production status 2025
+id:751|Shanghai GP3 100 roll film current production status 2025
+id:752|Shanghai GP3 400 current production status 2025
+id:810|AgfaPhoto APX 100 revival current production status 2025
+id:811|AgfaPhoto APX 400 revival current production status 2025
+id:812|ORWO UN54 current production status 2025
+id:850|Ilford Ortho Plus current production status 2025
+id:925|Impossible Project 8x10 Color film current production status 2025
+id:926|Polaroid Originals 600 Color current production status 2025
+id:927|Polaroid Originals SX-70 Color current production status 2025
+id:928|Polaroid i-Type Color current production status 2025
+id:929|Polaroid i-Type B&W current production status 2025
